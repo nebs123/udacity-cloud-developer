@@ -19,11 +19,10 @@ router.get('/', async (req: Request, res: Response) => {
 //@TODO
 //Add an endpoint to GET a specific resource by Primary Key
 router.get('/:id',
-    requireAuth,
     async (req: Request, res: Response) => {
         const { id } = req.params;
         if (!id){
-             res.status(400)
+             return res.status(400)
               .send({message: "id is required"});
         }
         const item: FeedItem = await FeedItem.findByPk(id);
@@ -44,10 +43,10 @@ router.patch('/:id',
     async (req: Request, res: Response) => {
         const { id } = req.params;
         if (!id){
-            res.status(400)
+            return res.status(400)
              .send({message: "id is required"});
        }
-       const { url, caption} = req.body
+       const { url, caption } = req.body
         if (!url)
             return res.status(400).send({message: "url was not specified in request body"});
         if (!caption)
