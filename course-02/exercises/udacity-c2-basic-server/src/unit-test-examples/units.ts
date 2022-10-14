@@ -15,3 +15,10 @@ export const divide = (a: number, b: number) => {
 // it should return one string combining the two strings.
 // it should throw an error if either of the strings are empty.
 // ensure your function is exported.
+export const concat = (a: string, b: string) => {
+    if (a === '' || b === '')
+        throw new Error('Cannot concat empty strings');
+    if (a === null || b === null)
+        throw new Error('String cannot be null or undefined');
+    return a + b;
+}

@@ -18,13 +18,50 @@ router.get('/', async (req: Request, res: Response) => {
 
 //@TODO
 //Add an endpoint to GET a specific resource by Primary Key
-
+router.get('/:id',
+    async (req: Request, res: Response) => {
+        const { id } = req.params;
+        if (!id){
+             return res.status(400)
+              .send({message: "id is required"});
+        }
+        const item: FeedItem = await FeedItem.findByPk(id);
+        console.log(item);
+        if (item)
+        {
+            const item_obj = item.get();
+            item_obj.url = AWS.getGetSignedUrl(item_obj.url);
+            console.log(item_obj);
+            res.status(200).send(item_obj); 
+        }
+        else 
+            res.status(404).send({message: `Feed item with id ${id} was not found`});
+});
 // update a specific resource
 router.patch('/:id', 
     requireAuth, 
     async (req: Request, res: Response) => {
-        //@TODO try it yourself
-        res.status(500).send("not implemented")
+        const { id } = req.params;
+        if (!id){
+            return res.status(400)
+             .send({message: "id is required"});
+       }
+       const { url, caption } = req.body
+        if (!url)
+            return res.status(400).send({message: "url was not specified in request body"});
+        if (!caption)
+            return res.status(400).send({message: "caption was not specified in request body"});
+       const item: FeedItem = await FeedItem.findByPk(id);
+       if (item)
+       {
+            item.url = url;
+            item.caption = caption;
+            const saved_item  = await item.save();
+            saved_item.url = AWS.getPutSignedUrl(saved_item.url); //might need to be changed to AWS.getPutSignedUrl
+            res.status(200).send(saved_item);
+       } else
+            res.status(404).send({message:`Feed item with id ${id} was not found`});
+
 });
 
 
@@ -62,9 +99,9 @@ router.post('/',
     });
 
     const saved_item = await item.save();
-
     saved_item.url = AWS.getGetSignedUrl(saved_item.url);
     res.status(201).send(saved_item);
+    
 });
 
 export const FeedRouter: Router = router;
