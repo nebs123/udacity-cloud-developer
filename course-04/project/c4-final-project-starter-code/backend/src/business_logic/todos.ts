@@ -17,9 +17,17 @@ export async function getTodosForUser(userId: string): Promise<TodoItem[]> {
     return todoAccess.getTodos(userId)
 }
 
-export function createAttachmentPresignedUrl(userId: string, todoId: string){
+export async function createAttachmentPresignedUrl(userId: string, todoId: string){
     logger.info("About to call pre signed url function in attachmentUtils")
-    return attachmentUtils.createPresignedUrl(userId, todoId)
+    
+    const preloadUrl = attachmentUtils.createPresignedUrl(userId, todoId)
+
+    logger.info("About to call attachUrl")
+    await todoAccess.attachUrl(userId, todoId, attachmentUtils.getAttachmentUrl(userId, todoId))
+    logger.info("Successfully called attachUrl")
+
+    return preloadUrl
+
 }
 
 export async function createTodo(createTodoRequest: CreateTodoRequest, userId: string)
@@ -32,8 +40,7 @@ export async function createTodo(createTodoRequest: CreateTodoRequest, userId: s
         createdAt: new Date().toISOString(),
         name: createTodoRequest.name,
         dueDate: createTodoRequest.dueDate,
-        done: false,
-        attachmentUrl: attachmentUtils.getAttachmentUrl(userId, todoId)
+        done: false
     })
 }
 

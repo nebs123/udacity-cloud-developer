@@ -11,6 +11,7 @@ const logger = createLogger('TodosAccess')
 
 // TODO: Implement the dataLayer logic
 export class TodosAccess{
+    
     constructor(
         private readonly docClient: DocumentClient = new XAWS.DynamoDB.DocumentClient(),
         private readonly todoTable = process.env.TODOS_TABLE,
@@ -81,7 +82,28 @@ export class TodosAccess{
             '#name': 'name'
           }
         }).promise()
-        
+
         logger.info("Update of item was successful")
+    }
+
+    async attachUrl(userId: string, todoId: string, attachmentUrl: string) 
+    {
+      const key = {
+        userId,
+        todoId
+      }
+
+      logger.info("About to add attachmentUrl", key)
+
+      await this.docClient.update({
+        TableName: this.todoTable,
+        Key: key,
+        UpdateExpression: 'set attachmentUrl = :attachmentUrl',
+        ExpressionAttributeValues: {
+          ':attachmentUrl': attachmentUrl
+        }
+      }).promise()
+
+      logger.info("Adding attachmentUrl was successful")
     }
 }
